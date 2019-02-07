@@ -22,12 +22,25 @@ folders = [folder for folder in folders if "." not in folder and folder not in o
 
 folder_length = len(folders)
 
-
+# only accept images of these types
 image_types = [".png", ".jpg", ".jpeg", ".JPG"]
+
 for folder_number, folder in enumerate(folders, 1):
 	print("Processing " + str(folder_number) + " of " + str(folder_length))
 
-	folder_images = [(folder + "/*" + image_type).encode(fileencoding) for image_type in image_types]
+	# find and split each separate files
+	files = check_output(["ls", folder]).decode(fileencoding)
+	files = files.split("\n")[:-1]
+
+	# find all extension types
+	files = [file[file.find("."):] for file in files]
+
+	from collections import Counter 
+
+	# only include the types that are accepted image types
+	file_types = [key for key in Counter(files).keys() if key in image_types]
+
+	folder_images = [(folder + "/*" + file_type).encode(fileencoding) for file_type in file_types]
 	command = ["convert"] + folder_images +  [(folder + ".pdf").encode(fileencoding)]
 	call(command)
 
